@@ -10,9 +10,15 @@ A gamified, referral-powered registration platform for the free workshop
 Not just a landing page — a **growth loop**: register → get a personal referral code →
 invite friends → climb the live leaderboard → unlock reward tiers → drive the campaign to **500**.
 
+### [🌐 &nbsp;Live Demo &nbsp;→](https://ai-launchpad-drab.vercel.app)
+
 [Why this instead of a landing page](#why-this-is-more-than-a-landing-page) ·
 [Run it](#run-it-locally) · [Deploy a live link](#deploy-a-live-link) ·
 [Growth Plan](docs/GROWTH-PLAN.md) · [AI Notes](docs/AI-NOTES.md)
+
+<br />
+
+![AI Launchpad preview](public/og.png)
 
 </div>
 
