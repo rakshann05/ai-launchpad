@@ -55,15 +55,19 @@ days into 500 registrations without paid ads carrying the whole load.
 - **Progress-to-500 goal bar** — the exact campaign target, with animated count-up
 - **5 gamified reward tiers** (Starter → Legend) that unlock as you refer
 - **WhatsApp / native share** with pre-written invite copy + `?ref=CODE` attribution
-- **"Extreme UI"** — glassmorphism, animated gradient mesh, scroll reveals, confetti, full dark theme, fully responsive
+- **Real backend (Supabase)** — cross-user registrations, referral attribution and a live, shared
+  leaderboard with realtime updates. Falls back to a self-contained demo when no keys are set.
+- **Editorial / Swiss UI** — warm paper, big Bricolage Grotesque type, a serif-italic accent,
+  hairline Swiss grid, one vermilion accent, scroll reveals, confetti, fully responsive.
 
 ## 🛠 Tech stack
 
 - **React 18 + TypeScript** (Vite 6)
+- **Supabase** (Postgres + Realtime) for the backend — optional, with graceful demo fallback
 - **Tailwind CSS v4** (CSS-first config)
 - **Framer Motion** for animation
 - **canvas-confetti**, **lucide-react** icons
-- Fonts: Space Grotesk (display) + Inter
+- Fonts: Bricolage Grotesque (display) · Instrument Serif (accent) · Inter (body) · Space Mono (numerals)
 
 ## Run it locally
 
@@ -85,16 +89,29 @@ The app is a static SPA — deploy `dist/` anywhere. Fastest options (free):
 - **Netlify:** build command `npm run build`, publish directory `dist`
 - **GitHub Pages:** push, then serve `dist/` via an action
 
-## How the referral tracking works (and productionizing it)
+## Backend — make it live with Supabase (~5 min)
 
-For a self-contained, zero-backend demo, the current user's registration and referral activity are
-persisted in `localStorage` (see [`src/lib/store.ts`](src/lib/store.ts)), and the leaderboard merges
-seed data with the live user. The **"▶ Demo: simulate a friend registering"** button lets a reviewer
-watch the tracker, tiers, and rank update instantly.
+The app ships **live-ready**. With no keys it runs in **demo mode** (seeded leaderboard + local
+referral simulation). Add two keys and it becomes a real, shared, cross-user system — the UI is
+identical in both modes (see [`src/lib/store.ts`](src/lib/store.ts) and
+[`src/lib/supabase.ts`](src/lib/supabase.ts)).
 
-To make referrals real across users, swap the `store.ts` functions for API calls:
-`register()` → `POST /registrations` returning a code; `?ref=CODE` → attribute on the referrer;
-leaderboard → `GET /leaderboard`. The UI does not change — only the data layer.
+1. Create a free project at [supabase.com](https://supabase.com).
+2. **SQL Editor → New query** → paste [`supabase/schema.sql`](supabase/schema.sql) → **Run**.
+   (Creates the `registrations` table + `leaderboard` view, RLS policies, realtime, and seed data.)
+3. **Settings → API** → copy the **Project URL** and the **anon / public** key.
+4. Add them as env vars — locally in a `.env` (copy [`.env.example`](.env.example)), and in
+   **Vercel → Settings → Environment Variables**:
+   ```
+   VITE_SUPABASE_URL=https://xxxx.supabase.co
+   VITE_SUPABASE_ANON_KEY=eyJhbGciOi...
+   ```
+5. Redeploy. Registrations now persist for everyone, `?ref=CODE` attributes referrals, and the
+   leaderboard updates live across devices.
+
+**What's real now:** registrations are rows in Postgres; your referral count is a live query;
+the leaderboard is a SQL view ordered by referrals; new signups push updates over Supabase Realtime.
+The **"▶ Demo"** button inserts a real referred row so reviewers can watch the board move.
 
 ## Project structure
 
@@ -102,18 +119,20 @@ leaderboard → `GET /leaderboard`. The UI does not change — only the data lay
 src/
 ├─ App.tsx                 # page composition + modal state
 ├─ lib/
-│  ├─ data.ts              # all copy, tiers, agenda, FAQ, seed data
-│  └─ store.ts             # registration + referral logic, countdown hook
+│  ├─ data.ts              # copy, tiers, agenda, FAQ, seed data
+│  ├─ supabase.ts          # Supabase client (null → demo mode)
+│  └─ store.ts             # useCampaign(): register / referrals / leaderboard / countdown
 └─ components/
-   ├─ Background.tsx       # animated gradient mesh + grid
-   ├─ Nav.tsx  Hero.tsx    # nav + hero with countdown
-   ├─ GoalBar.tsx          # animated 0→500 progress
+   ├─ Background.tsx       # Swiss paper grid
+   ├─ Nav.tsx  Hero.tsx    # nav + editorial hero with countdown panel
+   ├─ GoalBar.tsx          # 0→500 progress
    ├─ Sections.tsx         # audience / why / agenda
    ├─ Tiers.tsx            # reward tiers
-   ├─ Leaderboard.tsx      # podium + ranked list
+   ├─ Leaderboard.tsx      # live ruled leaderboard table
    ├─ RegisterModal.tsx    # registration + confetti
    ├─ Dashboard.tsx        # referral tracker
    └─ FaqFooter.tsx        # FAQ + final CTA + footer
+supabase/schema.sql        # DB schema + seed (run once)
 ```
 
 ## Deliverables for the challenge

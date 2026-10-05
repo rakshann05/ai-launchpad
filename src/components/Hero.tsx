@@ -1,135 +1,133 @@
 import { motion } from 'framer-motion'
-import { ArrowRight, CheckCircle2, Sparkles } from 'lucide-react'
 import { WORKSHOP } from '../lib/data'
-import { useCountdown, type Registrant } from '../lib/store'
-import { Pill } from './primitives'
+import { useCountdown, type Me } from '../lib/store'
 
-const COLLEGES = ['VIT', 'SRM', 'BITS', 'NIT-W', 'IIIT-H', 'Amrita', 'Anna Univ.', 'MIT Manipal', 'VNIT', 'KIIT']
+const COLLEGES = ['VIT', 'SRM', 'BITS', 'NIT-W', 'IIIT-H', 'Amrita', 'Anna Univ.', 'MIT Manipal', 'VNIT', 'KIIT', 'PES', 'RVCE']
 
-function CountCell({ value, label }: { value: number; label: string }) {
-  return (
-    <div className="flex flex-col items-center">
-      <div className="relative grid h-16 w-16 place-items-center rounded-2xl glass sm:h-20 sm:w-20">
-        <span className="font-display text-2xl font-bold tabular-nums sm:text-3xl">
-          {String(value).padStart(2, '0')}
-        </span>
-      </div>
-      <span className="mt-2 text-[10px] uppercase tracking-[0.2em] text-white/40">{label}</span>
-    </div>
-  )
-}
+const ease = [0.22, 1, 0.36, 1] as const
 
 export default function Hero({
   onRegister,
   me,
   seatsLeft,
+  total,
 }: {
   onRegister: () => void
-  me: Registrant | null
+  me: Me | null
   seatsLeft: number
+  total: number
 }) {
   const { d, h, m, s } = useCountdown()
+  const filledPct = Math.min(100, ((WORKSHOP.seatsTotal - seatsLeft) / WORKSHOP.seatsTotal) * 100)
 
   return (
-    <section id="top" className="relative px-5 pt-36 pb-20 sm:pt-44">
-      <div className="mx-auto max-w-5xl text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="flex justify-center"
-        >
-          <Pill>
-            <Sparkles className="h-3.5 w-3.5 text-amber" />
-            Free live workshop · {WORKSHOP.priceLabel} · Limited seats
-          </Pill>
-        </motion.div>
-
-        <motion.h1
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.08 }}
-          className="mx-auto mt-6 max-w-4xl font-display text-4xl font-bold leading-[1.05] sm:text-6xl md:text-7xl"
-        >
-          Build your first <span className="text-gradient">AI project</span>
-          <br className="hidden sm:block" /> in 60 minutes.
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.16 }}
-          className="mx-auto mt-6 max-w-2xl text-base text-white/60 sm:text-lg"
-        >
-          A free, live, hands-on workshop for final-year engineering students. Walk away with a
-          real AI app on your GitHub — and a live link you can drop on your resume today.
-        </motion.p>
-
-        {/* Countdown */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.24 }}
-          className="mt-10 flex items-center justify-center gap-3 sm:gap-4"
-        >
-          <CountCell value={d} label="days" />
-          <span className="pb-6 font-display text-2xl text-white/20">:</span>
-          <CountCell value={h} label="hrs" />
-          <span className="pb-6 font-display text-2xl text-white/20">:</span>
-          <CountCell value={m} label="min" />
-          <span className="pb-6 font-display text-2xl text-white/20">:</span>
-          <CountCell value={s} label="sec" />
-        </motion.div>
-
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.32 }}
-          className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
-        >
-          <button
-            onClick={onRegister}
-            className="group inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-violet to-cyan px-7 py-4 font-semibold text-white shadow-[0_0_40px_-8px_rgba(139,92,246,0.7)] transition hover:scale-[1.03] active:scale-95"
-          >
-            {me ? 'Open your referral dashboard' : 'Reserve my free seat'}
-            <ArrowRight className="h-5 w-5 transition group-hover:translate-x-1" />
-          </button>
-          <div className="inline-flex items-center gap-2 text-sm text-white/50">
-            <CheckCircle2 className="h-4 w-4 text-lime" />
-            No cost · No prerequisites · 60 min
-          </div>
-        </motion.div>
-
-        {/* Seats bar */}
+    <section id="top" className="relative px-5 pt-28 pb-16 sm:px-8 sm:pt-32">
+      <div className="mx-auto max-w-6xl">
+        {/* meta line */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.7, delay: 0.4 }}
-          className="mx-auto mt-10 max-w-sm"
+          transition={{ duration: 0.6 }}
+          className="kicker flex flex-wrap items-center gap-x-3 gap-y-1"
         >
-          <div className="flex items-center justify-between text-xs text-white/50">
-            <span>Seats filling fast</span>
-            <span className="font-semibold text-amber">{seatsLeft} left</span>
-          </div>
-          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-amber to-violet"
-              style={{ width: `${Math.min(100, ((WORKSHOP.seatsTotal - seatsLeft) / WORKSHOP.seatsTotal) * 100)}%` }}
-            />
-          </div>
+          <span className="text-accent">●</span>
+          <span>Free live workshop</span>
+          <span className="text-faint">/</span>
+          <span>{WORKSHOP.priceLabel}</span>
+          <span className="text-faint">/</span>
+          <span>Final-year engineers</span>
         </motion.div>
+
+        {/* headline */}
+        <motion.h1
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.06, ease }}
+          className="display mt-6 text-[clamp(2.7rem,9vw,7rem)] leading-[0.92]"
+        >
+          Build your <span className="ed-serif text-accent">first AI project</span>
+          <br />
+          in 60 minutes.
+        </motion.h1>
+
+        {/* two-column: pitch + details panel */}
+        <div className="mt-10 grid gap-10 md:grid-cols-[1.3fr_1fr] md:gap-14">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.16, ease }}
+          >
+            <p className="max-w-md text-lg leading-relaxed text-muted">
+              A live, hands-on workshop for final-year engineering students. Walk away with a real AI
+              app on your GitHub — and a live link you can put on your resume today.
+            </p>
+
+            <div className="mt-8 flex flex-wrap items-center gap-4">
+              <button
+                onClick={onRegister}
+                className="group inline-flex items-center gap-2.5 bg-accent px-7 py-4 text-base font-semibold text-paper transition hover:bg-ink"
+              >
+                {me ? 'Open your referral dashboard' : 'Reserve my free seat'}
+                <span className="transition group-hover:translate-x-1">→</span>
+              </button>
+              <span className="text-sm text-muted">No cost · No prerequisites · 60 min</span>
+            </div>
+
+            {/* live registrations ticker */}
+            <div className="mt-8 flex items-center gap-2.5 text-sm text-muted">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
+              </span>
+              <span className="nums text-ink">{total.toLocaleString('en-IN')}</span>
+              registered so far
+            </div>
+          </motion.div>
+
+          {/* details / countdown panel */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.24, ease }}
+            className="border border-line-strong bg-card"
+          >
+            <div className="rule-b flex items-center justify-between px-5 py-3">
+              <span className="kicker">Starts in</span>
+              <span className="kicker text-accent">Live</span>
+            </div>
+            <div className="grid grid-cols-4 divide-x divide-line text-center">
+              {[
+                { v: d, l: 'days' },
+                { v: h, l: 'hrs' },
+                { v: m, l: 'min' },
+                { v: s, l: 'sec' },
+              ].map((c) => (
+                <div key={c.l} className="py-5">
+                  <div className="nums text-3xl sm:text-4xl">{String(c.v).padStart(2, '0')}</div>
+                  <div className="kicker mt-1 text-[0.6rem]">{c.l}</div>
+                </div>
+              ))}
+            </div>
+            <div className="rule-t px-5 py-4">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted">Seats remaining</span>
+                <span className="nums font-bold text-accent">{seatsLeft}</span>
+              </div>
+              <div className="mt-2.5 h-1.5 w-full bg-line">
+                <div className="h-full bg-ink" style={{ width: `${filledPct}%` }} />
+              </div>
+            </div>
+          </motion.div>
+        </div>
       </div>
 
-      {/* College marquee */}
-      <div className="relative mt-20 overflow-hidden [mask-image:linear-gradient(90deg,transparent,#000_15%,#000_85%,transparent)]">
-        <p className="mb-5 text-center text-xs uppercase tracking-[0.3em] text-white/30">
-          Builders joining from
-        </p>
-        <div className="flex w-max animate-marquee gap-10">
+      {/* college marquee */}
+      <div className="mt-16 rule-t rule-b overflow-hidden py-4">
+        <div className="flex w-max animate-marquee items-center gap-10">
           {[...COLLEGES, ...COLLEGES].map((c, i) => (
-            <span key={i} className="font-display text-lg font-semibold text-white/25">
+            <span key={i} className="display shrink-0 text-xl text-faint">
               {c}
+              <span className="ml-10 text-accent">✱</span>
             </span>
           ))}
         </div>

@@ -13,31 +13,21 @@ import {
   Zap,
   type LucideIcon,
 } from 'lucide-react'
-import { useRef, type ReactNode } from 'react'
+import { useRef, type CSSProperties, type ReactNode } from 'react'
 
 export const ICONS: Record<string, LucideIcon> = {
-  GraduationCap,
-  Clock,
-  Briefcase,
-  Ticket,
-  Link2,
-  Zap,
-  Crown,
-  Trophy,
-  Rocket,
-  Sparkles,
-  Award,
+  GraduationCap, Clock, Briefcase, Ticket, Link2, Zap, Crown, Trophy, Rocket, Sparkles, Award,
 }
 
-export function Icon({ name, className }: { name: string; className?: string }) {
+export function Icon({ name, className, style }: { name: string; className?: string; style?: CSSProperties }) {
   const C = ICONS[name] ?? Sparkles
-  return <C className={className} />
+  return <C className={className} style={style} />
 }
 
 export function Reveal({
   children,
   delay = 0,
-  y = 28,
+  y = 22,
   className,
 }: {
   children: ReactNode
@@ -46,7 +36,7 @@ export function Reveal({
   className?: string
 }) {
   const ref = useRef(null)
-  const inView = useInView(ref, { once: true, margin: '-80px' })
+  const inView = useInView(ref, { once: true, margin: '-70px' })
   return (
     <motion.div
       ref={ref}
@@ -60,38 +50,33 @@ export function Reveal({
   )
 }
 
-export function Pill({ children }: { children: ReactNode }) {
-  return (
-    <span className="inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 text-xs font-medium tracking-wide text-white/70">
-      {children}
-    </span>
-  )
-}
-
+// Editorial section header: hairline rule + numbered kicker + big left title.
 export function SectionHead({
-  eyebrow,
+  index,
+  label,
   title,
   sub,
 }: {
-  eyebrow: string
+  index: string
+  label: string
   title: ReactNode
   sub?: string
 }) {
   return (
-    <div className="mx-auto mb-14 max-w-2xl text-center">
+    <div className="rule-t pt-6">
       <Reveal>
-        <span className="text-xs font-semibold uppercase tracking-[0.25em] text-violet">
-          {eyebrow}
-        </span>
+        <div className="kicker flex items-center gap-3">
+          <span className="text-accent">{index}</span>
+          <span className="h-px w-8 bg-line-strong/30" />
+          <span>{label}</span>
+        </div>
       </Reveal>
       <Reveal delay={0.05}>
-        <h2 className="mt-3 font-display text-3xl font-bold leading-tight sm:text-4xl md:text-5xl">
-          {title}
-        </h2>
+        <h2 className="display mt-5 max-w-3xl text-4xl sm:text-5xl md:text-6xl">{title}</h2>
       </Reveal>
       {sub && (
         <Reveal delay={0.1}>
-          <p className="mt-4 text-base text-white/55">{sub}</p>
+          <p className="mt-5 max-w-xl text-lg text-muted">{sub}</p>
         </Reveal>
       )}
     </div>

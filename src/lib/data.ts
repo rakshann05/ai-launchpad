@@ -100,16 +100,17 @@ export const FAQ = [
   },
 ]
 
-// Seed leaderboard so an empty page still feels alive (demo data).
+// Seed leaderboard so an empty page still feels alive (demo mode).
+// Codes mirror supabase/schema.sql so live + demo stay consistent.
 export const SEED_LEADERS = [
-  { name: 'Aarav S.', college: 'VIT', referrals: 14 },
-  { name: 'Priya R.', college: 'SRM', referrals: 11 },
-  { name: 'Karthik M.', college: 'IIIT-H', referrals: 9 },
-  { name: 'Sneha P.', college: 'BITS', referrals: 7 },
-  { name: 'Rahul D.', college: 'NIT-W', referrals: 6 },
-  { name: 'Ananya K.', college: 'Amrita', referrals: 5 },
-  { name: 'Vikram N.', college: 'Anna Univ.', referrals: 4 },
-  { name: 'Divya T.', college: 'MIT Manipal', referrals: 3 },
+  { code: 'AARV-AI100', name: 'Aarav S.', college: 'VIT', referrals: 14 },
+  { code: 'PRIY-AI101', name: 'Priya R.', college: 'SRM', referrals: 11 },
+  { code: 'KART-AI102', name: 'Karthik M.', college: 'IIIT-H', referrals: 9 },
+  { code: 'SNEH-AI103', name: 'Sneha P.', college: 'BITS', referrals: 7 },
+  { code: 'RAHU-AI104', name: 'Rahul D.', college: 'NIT-W', referrals: 6 },
+  { code: 'ANAN-AI105', name: 'Ananya K.', college: 'Amrita', referrals: 5 },
+  { code: 'VIKR-AI106', name: 'Vikram N.', college: 'Anna Univ.', referrals: 4 },
+  { code: 'DIVY-AI107', name: 'Divya T.', college: 'MIT Manipal', referrals: 3 },
 ]
 
 // Baseline registrations already "in" — drives the goal bar (demo).
