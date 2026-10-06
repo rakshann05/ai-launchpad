@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import Admin from './components/Admin'
 import Background from './components/Background'
 import Dashboard from './components/Dashboard'
 import { Faq, FinalCta, Footer } from './components/FaqFooter'
@@ -13,11 +14,40 @@ import Tiers from './components/Tiers'
 import { WORKSHOP } from './lib/data'
 import { useCampaign } from './lib/store'
 
+// Minimal client router: /admin (path or #admin) → growth cockpit.
+function useRoute() {
+  const read = () =>
+    location.pathname.replace(/\/$/, '').endsWith('/admin') || location.hash.replace('#', '').replace('/', '') === 'admin'
+      ? 'admin'
+      : 'home'
+  const [route, setRoute] = useState<'home' | 'admin'>(read)
+  useEffect(() => {
+    const on = () => setRoute(read())
+    window.addEventListener('popstate', on)
+    window.addEventListener('hashchange', on)
+    return () => {
+      window.removeEventListener('popstate', on)
+      window.removeEventListener('hashchange', on)
+    }
+  }, [])
+  return route
+}
+
 export default function App() {
+  const route = useRoute()
   const { me, myReferrals, myRank, total, leaders, loading, busy, isLive, register, addReferral } = useCampaign()
   const [modalOpen, setModalOpen] = useState(false)
   const seatsLeft = Math.max(12, WORKSHOP.seatsTotal - total)
   const openModal = () => setModalOpen(true)
+
+  if (route === 'admin') {
+    return (
+      <div className="relative min-h-screen">
+        <Background />
+        <Admin />
+      </div>
+    )
+  }
 
   return (
     <div className="relative min-h-screen">

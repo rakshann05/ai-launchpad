@@ -1,7 +1,8 @@
 import confetti from 'canvas-confetti'
 import { AnimatePresence, motion } from 'framer-motion'
-import { PartyPopper, X } from 'lucide-react'
+import { CalendarPlus, Download, PartyPopper, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { downloadIcs, googleCalUrl } from '../lib/calendar'
 import type { Me } from '../lib/store'
 import Dashboard from './Dashboard'
 
@@ -79,11 +80,29 @@ export default function RegisterModal({
             {showDashboard ? (
               <div className="p-6">
                 {justRegistered && (
-                  <div className="mb-5 flex items-center gap-3 border border-line-strong bg-accent/10 p-3 text-sm">
-                    <PartyPopper className="h-5 w-5 shrink-0 text-accent" />
-                    <span>
-                      <b>You're in!</b> Your seat is reserved. Now invite friends to unlock rewards ↓
-                    </span>
+                  <div className="mb-5 border border-line-strong">
+                    <div className="flex items-center gap-3 rule-b bg-accent/10 p-3 text-sm">
+                      <PartyPopper className="h-5 w-5 shrink-0 text-accent" />
+                      <span>
+                        <b>You're in!</b> Lock the time so you don't miss it — then invite friends ↓
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-px bg-line">
+                      <a
+                        href={googleCalUrl()}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center justify-center gap-2 bg-paper px-3 py-2.5 text-xs font-semibold transition hover:bg-ink hover:text-paper"
+                      >
+                        <CalendarPlus className="h-4 w-4" /> Google Calendar
+                      </a>
+                      <button
+                        onClick={downloadIcs}
+                        className="inline-flex items-center justify-center gap-2 bg-paper px-3 py-2.5 text-xs font-semibold transition hover:bg-ink hover:text-paper"
+                      >
+                        <Download className="h-4 w-4" /> Apple / .ics
+                      </button>
+                    </div>
                   </div>
                 )}
                 <Dashboard me={me!} referrals={referrals} rank={rank} onAddReferral={onAddReferral} isLive={isLive} />

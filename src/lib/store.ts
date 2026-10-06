@@ -255,3 +255,156 @@ export function useCampaign() {
 
   return { me, myReferrals, myRank, total, leaders, loading, busy, isLive, register, addReferral, refresh }
 }
+
+// ─────────────────────────────────────────────────────────────
+// Admin / growth analytics
+// ─────────────────────────────────────────────────────────────
+
+export interface DayCount {
+  label: string
+  count: number
+}
+export interface AdminStats {
+  total: number
+  goal: number
+  referred: number
+  direct: number
+  referralShare: number // 0..1
+  kFactor: number // avg referrals generated per registrant
+  perDay: DayCount[]
+  topReferrers: { name: string; college: string; referrals: number }[]
+  dailyRate: number
+  projectionDays: number | null
+  projectedLabel: string
+}
+
+function dayKey(d: Date) {
+  return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })
+}
+
+function bucketPerDay(dates: Date[], days = 7): DayCount[] {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const out: DayCount[] = []
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today)
+    d.setDate(today.getDate() - i)
+    out.push({ label: dayKey(d), count: 0 })
+  }
+  const idxByKey = new Map(out.map((o, i) => [o.label, i]))
+  for (const dt of dates) {
+    const k = dayKey(new Date(dt))
+    const i = idxByKey.get(k)
+    if (i !== undefined) out[i].count++
+  }
+  return out
+}
+
+function project(total: number, goal: number, dailyRate: number) {
+  if (total >= goal) return { projectionDays: 0, projectedLabel: 'Goal reached 🎉' }
+  if (dailyRate <= 0) return { projectionDays: null, projectedLabel: 'Need more data' }
+  const days = Math.ceil((goal - total) / dailyRate)
+  const d = new Date()
+  d.setDate(d.getDate() + days)
+  return { projectionDays: days, projectedLabel: d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) }
+}
+
+// Demo analytics — a believable 7-day ramp summing near BASE_REGISTRATIONS.
+function demoStats(): AdminStats {
+  const perDay: DayCount[] = (() => {
+    const shape = [34, 41, 38, 49, 58, 54, 53]
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return shape.map((count, i) => {
+      const d = new Date(today)
+      d.setDate(today.getDate() - (shape.length - 1 - i))
+      return { label: dayKey(d), count }
+    })
+  })()
+  const total = BASE_REGISTRATIONS
+  const referred = SEED_LEADERS.reduce((s, l) => s + l.referrals, 0)
+  const direct = total - referred
+  const recent = perDay.slice(-3)
+  const dailyRate = recent.reduce((s, d) => s + d.count, 0) / recent.length
+  const { projectionDays, projectedLabel } = project(total, WORKSHOP.goal, dailyRate)
+  return {
+    total,
+    goal: WORKSHOP.goal,
+    referred,
+    direct,
+    referralShare: referred / total,
+    kFactor: referred / total,
+    perDay,
+    topReferrers: SEED_LEADERS.slice(0, 6).map((l) => ({ name: l.name, college: l.college, referrals: l.referrals })),
+    dailyRate,
+    projectionDays,
+    projectedLabel,
+  }
+}
+
+export function useAdminStats() {
+  const [stats, setStats] = useState<AdminStats | null>(() => (isLive ? null : demoStats()))
+  const [loading, setLoading] = useState<boolean>(isLive)
+
+  const load = useCallback(async () => {
+    if (!isLive || !supabase) {
+      setStats(demoStats())
+      setLoading(false)
+      return
+    }
+    try {
+      const [{ count: total }, { count: referred }, datesRes, boardRes] = await Promise.all([
+        supabase.from('registrations').select('*', { count: 'exact', head: true }),
+        supabase.from('registrations').select('*', { count: 'exact', head: true }).not('referred_by', 'is', null),
+        supabase.from('registrations').select('created_at').order('created_at', { ascending: false }).limit(5000),
+        supabase.from('leaderboard').select('name,college,referrals').order('referrals', { ascending: false }).limit(6),
+      ])
+      const T = total ?? 0
+      const R = referred ?? 0
+      const dates = (datesRes.data ?? []).map((r) => new Date(r.created_at as string))
+      const perDay = bucketPerDay(dates)
+      const recent = perDay.slice(-3)
+      const dailyRate = recent.reduce((s, d) => s + d.count, 0) / Math.max(1, recent.length)
+      const { projectionDays, projectedLabel } = project(T, WORKSHOP.goal, dailyRate)
+      setStats({
+        total: T,
+        goal: WORKSHOP.goal,
+        referred: R,
+        direct: Math.max(0, T - R),
+        referralShare: T ? R / T : 0,
+        kFactor: T ? R / T : 0,
+        perDay,
+        topReferrers: (boardRes.data ?? []).map((r) => ({
+          name: r.name as string,
+          college: r.college as string,
+          referrals: Number(r.referrals),
+        })),
+        dailyRate,
+        projectionDays,
+        projectedLabel,
+      })
+    } catch (e) {
+      console.warn('[admin] failed, showing demo', e)
+      setStats(demoStats())
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    load()
+    if (!isLive || !supabase) return
+    const sb = supabase
+    const ch = sb
+      .channel('admin-stream')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'registrations' }, () => load())
+      .subscribe()
+    const poll = setInterval(load, 20000)
+    return () => {
+      sb.removeChannel(ch)
+      clearInterval(poll)
+    }
+  }, [load])
+
+  return { stats, loading, isLive, reload: load }
+}

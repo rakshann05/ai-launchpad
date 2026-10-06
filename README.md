@@ -57,6 +57,11 @@ days into 500 registrations without paid ads carrying the whole load.
 - **WhatsApp / native share** with pre-written invite copy + `?ref=CODE` attribution
 - **Real backend (Supabase)** — cross-user registrations, referral attribution and a live, shared
   leaderboard with realtime updates. Falls back to a self-contained demo when no keys are set.
+- **Growth Cockpit** at [`/admin`](https://nxtwave-ai-launchpad.vercel.app/admin) — live funnel, viral
+  **K-factor**, referred-vs-direct split, registrations/day chart, and a **projected date to 500** with an
+  on-track/behind verdict. Turns the page into a growth operator's command center.
+- **Add-to-Calendar** on registration — Google Calendar link + downloadable `.ics` (Apple/Outlook) so
+  signups actually turn into attendance.
 - **Editorial / Swiss UI** — warm paper, big Bricolage Grotesque type, a serif-italic accent,
   hairline Swiss grid, one vermilion accent, scroll reveals, confetti, fully responsive.
 

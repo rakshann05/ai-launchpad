@@ -75,7 +75,10 @@ export function Footer() {
     <footer className="rule-t px-5 py-10 sm:px-8">
       <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-3 text-sm text-muted sm:flex-row sm:items-center">
         <span className="display text-base text-ink">AI&nbsp;Launchpad <span className="kicker">/ NxtWave</span></span>
-        <span className="kicker">© {new Date().getFullYear()} — Growth Intern Challenge · referral growth engine</span>
+        <div className="flex items-center gap-5">
+          <a href="/admin" className="kicker transition hover:text-accent">Growth cockpit →</a>
+          <span className="kicker">© {new Date().getFullYear()} — Growth Intern Challenge</span>
+        </div>
       </div>
     </footer>
   )
